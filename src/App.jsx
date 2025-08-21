@@ -1,46 +1,31 @@
-import React from 'react'
-import { Routes, Route, useLocation, Link, Navigate } from 'react-router-dom'
-import Splash from './pages/Splash'
-import Mining from './pages/Mining'
-import Wallet from './pages/Wallet'
+import React, { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Dial from "./components/Dial";
+import ClaimButton from "./components/ClaimButton";
+import Wallet from "./components/Wallet";
 
-function Topbar(){ 
+function App() {
+  const [points, setPoints] = useState(0);
+  const [lastClaim, setLastClaim] = useState(null);
+
+  const handleClaim = () => {
+    const now = Date.now();
+    if (!lastClaim || now - lastClaim >= 4 * 60 * 60 * 1000) {
+      setPoints(points + 10); // add 10 ROAR points
+      setLastClaim(now);
+    } else {
+      alert("⏳ You can claim again after 4 hours!");
+    }
+  };
+
   return (
-    <div className="topbar">
-      <div className="title">ROAR</div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      <Header />
+      <Dial lastClaim={lastClaim} />
+      <ClaimButton onClaim={handleClaim} />
+      <Wallet points={points} />
     </div>
-  )
+  );
 }
 
-function BottomNav(){
-  const { pathname } = useLocation()
-  const items = [
-    { to:'/wallet', label:'Wallet' },
-    { to:'/mining', label:'Mining' },
-    { to:'/profile', label:'Profile' }
-  ]
-  return (
-    <div className="bottomnav">
-      {items.map(it => (
-        <Link key={it.to} to={it.to} className={'nav-item ' + (pathname===it.to?'active':'')}>
-          <div>{it.label}</div>
-        </Link>
-      ))}
-    </div>
-  )
-}
-
-export default function App(){
-  return (
-    <div className="app">
-      <Topbar/>
-      <Routes>
-        <Route path="/" element={<Splash/>}/>
-        <Route path="/mining" element={<Mining/>}/>
-        <Route path="/wallet" element={<Wallet/>}/>
-        <Route path="*" element={<Navigate to="/" replace/>}/>
-      </Routes>
-      <BottomNav/>
-    </div>
-  )
-}
+export default App;
